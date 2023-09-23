@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions      = [pgcrypto]
+}
+
+model booking {
+  id                                         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  booking_time                               DateTime @db.Timestamp(6)
+  user_id                                    String   @db.Uuid
+  event_id                                   String   @db.Uuid
+  created_at                                 DateTime @default(now()) @db.Timestamp(6)
+  updated_at                                 DateTime @default(now()) @db.Timestamp(6)
+  event_booking_event_idToevent              event    @relation("booking_event_idToevent", fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user                                       user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  event_event_participation_rewardsTobooking event[]  @relation("event_participation_rewardsTobooking")
+}
+
+model event {
+  id                                           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                                         String    @db.VarChar(100)
+  location                                     String    @db.VarChar(255)
+  start_time                                   DateTime  @db.Timestamp(6)
+  end_time                                     DateTime  @db.Timestamp(6)
+  organizer_id                                 String    @db.Uuid
+  created_at                                   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at                                   DateTime  @default(now()) @db.Timestamp(6)
+  participation_rewards                        String?   @db.Uuid
+  booking_booking_event_idToevent              booking[] @relation("booking_event_idToevent")
+  user                                         user      @relation(fields: [organizer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  booking_event_participation_rewardsTobooking booking?  @relation("event_participation_rewardsTobooking", fields: [participation_rewards], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  team                                         team[]
+}
+
+model event_location {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model personal_trainer {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @db.VarChar(100)
+  specialty  String   @db.VarChar(100)
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  user       user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model team {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description String?  @db.VarChar(255)
+  event_id    String?  @db.Uuid
+  name        String   @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  user_id     String   @db.Uuid
+  tenant_id   String   @db.VarChar(255)
+  event       event?   @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user        user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model trainer_specialization {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model user {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email            String             @unique @db.VarChar(255)
+  firstName        String?            @db.VarChar(255)
+  lastName         String?            @db.VarChar(255)
+  roq_user_id      String             @db.VarChar(255)
+  tenant_id        String             @db.VarChar(255)
+  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  updated_at       DateTime           @default(now()) @db.Timestamp(6)
+  booking          booking[]
+  event            event[]
+  personal_trainer personal_trainer[]
+  team             team[]
+  virtual_buddy    virtual_buddy[]
+}
+
+model user_preferences {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model virtual_buddy {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String   @db.VarChar(100)
+  user_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  user       user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

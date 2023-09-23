@@ -1,0 +1,8 @@
+import * as yup from 'yup';
+
+export const teamValidationSchema = yup.object().shape({
+  description: yup.string().nullable(),
+  name: yup.string().required(),
+  event_id: yup.string().nullable(),
+  user_id: yup.string().nullable().required(),
+});
